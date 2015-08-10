@@ -12,7 +12,7 @@
 <script>
   (function() {
     Dropzone.autoDiscover = false;
-
+    // Wasappli fork
     var mockFiles = [<%= render_mock_dropzone_files(object.send(method)) %>];
     var dropzone_id = "#dropzone_<%= method %>_<%= current_cycle(method) %>";
     var dropzone = new Dropzone(dropzone_id, {
