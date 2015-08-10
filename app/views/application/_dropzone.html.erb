@@ -1,6 +1,5 @@
 <div id="dropzone_<%= method %>_<%= cycle(*(1..999).to_a, name: method) %>" class="dropzone">
   <span class="notice"><%=t 'dropzone.drag_or_click' %></span>
-  <%= hidden_field_tag "#{ object.class.model_name.singular }[#{ method }_attributes][-1]", "" %>
   <% object.send(method).each_with_index do |dropzone_object, index| %>
     <%= hidden_field_tag "#{ object.class.model_name.singular }[#{ method }_attributes][#{ dropzone_object.id }][#{ object.class.send("dropzone_#{ method }_field", :title) }]", dropzone_object.send(object.class.send("dropzone_#{ method }_field", :title)) %>
   <% end %>
@@ -14,10 +13,10 @@
   (function() {
     Dropzone.autoDiscover = false;
 
-    var mockFiles = <%= render_mock_dropzone_files(object.send(method)) %>;
-    var dropzone_id = "#dropzone_<%= method %>_<%= current_cycle(method) %>"; 
-    var dropzone_options = { 
-      url: '<%= raw upload_dropzone_path(dropzonable_id: (object.new_record? ? nil : object.id), dropzonable_class: object.class, dropzone_class: object.class.send("dropzone_#{ method }_class")) %>',
+    var mockFiles = [<%= render_mock_dropzone_files(object.send(method)) %>];
+    var dropzone_id = "#dropzone_<%= method %>_<%= current_cycle(method) %>";
+    var dropzone = new Dropzone(dropzone_id, {
+      url: '<%= raw upload_dropzone_path(dropzonable_class: object.class, dropzone_class: object.class.send("dropzone_#{ method }_class")) + '&' + "dropzonable_id=#{object.id}" %>' ,
       addRemoveLinks: true,
       dictCancelUpload: '<%=t "dropzone.cancel" %>',
       dictRemoveFile: '<%=t "dropzone.remove" %>',
@@ -38,13 +37,7 @@
         $(file.previewElement).remove();
         $(dropzone_id).sortable('refresh');
       }
-    };
-    
-    if (window.<%= method %>_dropzone_preview_template || window.dropzone_preview_template) {
-      dropzone_options['previewTemplate'] = window.<%= method %>_dropzone_preview_template || window.dropzone_preview_template;
-    }
-    
-    var dropzone = new Dropzone(dropzone_id, dropzone_options);
+    });
 
     $(dropzone_id).sortable({
       items: '.dz-preview',
